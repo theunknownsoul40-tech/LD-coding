@@ -10,13 +10,14 @@ def test_business_validation_passes_simple_record():
 
 
 def test_business_validation_flags_invalid_share_and_area_change():
-    result = validate_business_record({"area": 3.0, "survey_no": "125/2", "owner": "Ramesh", "district": "Thane"}, previous_area_hectare=2.0, ownership_share=0.5)
+    result = validate_business_record({"area": 3.0, "survey_no": "125/2", "owner": "Ramesh", "district": "Thane", "ownership_share": 1.5}, previous_area_hectare=2.0)
     assert result.checks["area_change_within_threshold"] is False
+    assert result.checks["ownership_share_valid"] is False
 
 
-def test_spatial_area_discrepancy_is_not_fraud():
+def test_spatial_area_discrepancy_requires_verification():
     result = validate_spatial(2.43, SpatialRecord(survey_no="125/2", area_hectare=2.41), area_tolerance_hectare=0.01, document_survey_no="125/2")
-    assert not result.passed
+    assert result.issues
     assert "discrepancy" in result.issues[0].message.lower()
     assert "fraud" not in result.issues[0].message.lower()
 
